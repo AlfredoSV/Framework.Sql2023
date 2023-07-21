@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FrameworkSql
 {
@@ -13,7 +10,7 @@ namespace FrameworkSql
         private SqlConnection SsqlConnection;
         private SqlCommand sqlCommand;
         private SqlDataReader sqlDataReader;
-        private String ConnectionStr { get; set; }
+        private string ConnectionStr { get; set; }
 
         public SqlDB(string connectionStr)
         {
@@ -39,8 +36,6 @@ namespace FrameworkSql
                     objectResList.Add(objectRes);
                 }
 
-
-
             }
 
             return objectResList;
@@ -48,7 +43,6 @@ namespace FrameworkSql
 
         public T Select()
         {
-
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
             SsqlConnection = new SqlConnection(ConnectionStr);
@@ -60,7 +54,6 @@ namespace FrameworkSql
                 sqlDataReader = sqlCommand.ExecuteReader();
                 sqlDataReader.Read();
                 objectRes = MapObjectResult(sqlDataReader);
-
             }
 
             return objectRes;
@@ -68,16 +61,13 @@ namespace FrameworkSql
 
         public void Insert(T obj)
         {
-
             string sql = GenerateSqlInsert(obj);
             SsqlConnection = new SqlConnection(ConnectionStr);
             using (SsqlConnection)
             {
                 SsqlConnection.Open();
-
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
                 sqlCommand.ExecuteNonQuery();
-
 
             }
 
@@ -93,7 +83,6 @@ namespace FrameworkSql
             string values = string.Empty;
             TableProps tableProps = GetPropsTable(objectRes);
 
-
             foreach (TableColumns column in tableProps.Columns)
                 columns += column.Name + ",";
 
@@ -102,16 +91,15 @@ namespace FrameworkSql
 
             foreach (PropertyInfo prop in objectRes.GetType().GetProperties())
             {
-                values += "'" + prop.GetValue(objectRes) + "'"  + ",";
+                string type = prop.PropertyType.Name;
 
+                values += "'" + prop.GetValue(objectRes) + "'"  + ",";
             }
 
             values = values.Trim(',');
             values += ")";
 
-
             sql = sql + " " + columns + " " + selectElemens[1] + values;
-
             return sql;
         }
 
@@ -164,20 +152,7 @@ namespace FrameworkSql
                         tableProps.Columns.Add(new TableColumns() { Name = sqlDataReader.GetString(1) });
                     }
                 }
-
-
-
-
             }
-
-            /*PropertyInfo[] properties = obj.GetType().GetProperties();
-
-            tableProps.Columns = new List<TableColumns>();
-
-            foreach (var property in properties)
-            {
-                tableProps.Columns.Add(new TableColumns() { Name = property.Name });
-            }*/
             return tableProps;
         }
 
@@ -198,6 +173,7 @@ namespace FrameworkSql
 
             return objectRes;
         }
+
         #endregion
 
     }
