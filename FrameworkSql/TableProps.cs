@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FrameworkSql
+namespace Framework.Sql2023
 {
 
     public class TableProps

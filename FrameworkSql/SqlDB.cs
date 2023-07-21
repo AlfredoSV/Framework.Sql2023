@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
 
-namespace FrameworkSql
+namespace Framework.Sql2023
 {
     public class SqlDB<T>
     {
