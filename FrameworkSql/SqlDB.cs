@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Linq;
 
 namespace Framework.Sql2023
 {
@@ -68,9 +69,51 @@ namespace Framework.Sql2023
                 SsqlConnection.Open();
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
                 sqlCommand.ExecuteNonQuery();
+            }
+
+        }
+
+        public StatusQuery Delete(T obj)
+        {
+            string columnId = string.Empty;
+            string value = string.Empty;
+            string sql = GenerateSqlDelete(obj);
+            StatusQuery result = StatusQuery.RowsNotAfected;
+            SsqlConnection = new SqlConnection(ConnectionStr);
+
+            using (SsqlConnection)
+            {
+                SsqlConnection.Open();
+                sqlCommand = new SqlCommand(sql, SsqlConnection);
+
+                ////Add Parameters
+
+                PropertyInfo[] props = obj.GetType().GetProperties();
+
+                foreach (PropertyInfo prop in props)
+                {
+                    List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
+                    if (attri.Any(att => att.AttributeType.Name == "Id"))
+                        columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
+                }
+
+                foreach (PropertyInfo prop in props)
+                {
+                    string nameProp = prop.Name;
+                    if (nameProp == columnId)
+                         value = prop.GetValue(obj).ToString();                 
+                        
+                }
+
+                ///
+
+                sqlCommand.Parameters.AddWithValue("id", value);
+                if (sqlCommand.ExecuteNonQuery() >= 1)
+                    result = StatusQuery.Ok;
 
             }
 
+            return result;
         }
 
         #region Private Methods
@@ -102,6 +145,26 @@ namespace Framework.Sql2023
             sql = sql + " " + columns + " " + selectElemens[1] + values;
             return sql;
         }
+
+        private string GenerateSqlDelete(T objectRes)
+        {
+            string columnId = string.Empty;
+
+            PropertyInfo[] props = objectRes.GetType().GetProperties();
+
+            foreach (PropertyInfo prop in props)
+            {
+                List<CustomAttributeData>  attri = prop.CustomAttributes.ToList();
+                if (attri.Any(att => att.AttributeType.Name == "Id"))
+                    columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
+            }
+
+            string sql = $"DELETE FROM {objectRes.GetType().Name} WHERE {columnId} = @id;";
+
+
+            return sql;
+        }
+
 
         private string GenerateSqlSelect(T objectRes)
         {
@@ -176,6 +239,14 @@ namespace Framework.Sql2023
 
         #endregion
 
+        
+
+    }
+
+    public enum StatusQuery
+    {
+        Ok = 1,
+        RowsNotAfected = 0
     }
 
 }
