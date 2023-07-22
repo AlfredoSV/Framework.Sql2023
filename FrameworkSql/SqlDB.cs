@@ -68,16 +68,22 @@ namespace Framework.Sql2023
             {
                 SsqlConnection.Open();
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
+
+                foreach (PropertyInfo prop in obj.GetType().GetProperties())
+                {
+                    sqlCommand.Parameters.AddWithValue($"@{prop.Name}",prop.GetValue(obj));
+                }
+
                 sqlCommand.ExecuteNonQuery();
             }
 
         }
 
-        public StatusQuery Delete(T obj)
+        public StatusQuery Delete<K>(K id)
         {
             string columnId = string.Empty;
-            string value = string.Empty;
-            string sql = GenerateSqlDelete(obj);
+            //string value = string.Empty;
+            string sql = GenerateSqlDelete();
             StatusQuery result = StatusQuery.RowsNotAfected;
             SsqlConnection = new SqlConnection(ConnectionStr);
 
@@ -88,7 +94,7 @@ namespace Framework.Sql2023
 
                 ////Add Parameters
 
-                PropertyInfo[] props = obj.GetType().GetProperties();
+                PropertyInfo[] props = typeof(T).GetType().GetProperties();
 
                 foreach (PropertyInfo prop in props)
                 {
@@ -97,17 +103,17 @@ namespace Framework.Sql2023
                         columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
                 }
 
-                foreach (PropertyInfo prop in props)
-                {
-                    string nameProp = prop.Name;
-                    if (nameProp == columnId)
-                         value = prop.GetValue(obj).ToString();                 
+                //foreach (PropertyInfo prop in props)
+                //{
+                //    string nameProp = prop.Name;
+                //    if (nameProp == columnId)
+                //         value = prop.GetValue(type).ToString();                 
                         
-                }
+                //}
 
                 ///
 
-                sqlCommand.Parameters.AddWithValue("id", value);
+                sqlCommand.Parameters.AddWithValue("id", id);
                 if (sqlCommand.ExecuteNonQuery() >= 1)
                     result = StatusQuery.Ok;
 
@@ -127,17 +133,21 @@ namespace Framework.Sql2023
             TableProps tableProps = GetPropsTable(objectRes);
 
             foreach (TableColumns column in tableProps.Columns)
+            {
                 columns += column.Name + ",";
+                values += "@"+column.Name + ",";
+            }
+                
 
             columns = columns.Trim(',');
             columns += ")";
 
-            foreach (PropertyInfo prop in objectRes.GetType().GetProperties())
-            {
-                string type = prop.PropertyType.Name;
+            //foreach (PropertyInfo prop in objectRes.GetType().GetProperties())
+            //{
+            //    string type = prop.PropertyType.Name;
 
-                values += "'" + prop.GetValue(objectRes) + "'"  + ",";
-            }
+            //    values += "'" + prop.GetValue(objectRes) + "'"  + ",";
+            //}
 
             values = values.Trim(',');
             values += ")";
@@ -146,11 +156,11 @@ namespace Framework.Sql2023
             return sql;
         }
 
-        private string GenerateSqlDelete(T objectRes)
+        private string GenerateSqlDelete()
         {
             string columnId = string.Empty;
-
-            PropertyInfo[] props = objectRes.GetType().GetProperties();
+            T instace = Activator.CreateInstance<T>();
+            PropertyInfo[] props = instace.GetType().GetProperties();
 
             foreach (PropertyInfo prop in props)
             {
@@ -159,7 +169,7 @@ namespace Framework.Sql2023
                     columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
             }
 
-            string sql = $"DELETE FROM {objectRes.GetType().Name} WHERE {columnId} = @id;";
+            string sql = $"DELETE FROM {instace.GetType().Name} WHERE {columnId} = @id;";
 
 
             return sql;
