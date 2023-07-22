@@ -18,22 +18,23 @@ namespace Framework.Sql2023
             this.ConnectionStr = connectionStr;
         }
 
-        public List<T> SelectList()
+        public IEnumerable<T> SelectList()
         {
             List<T> objectResList = Activator.CreateInstance<List<T>>();
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
             SsqlConnection = new SqlConnection(ConnectionStr);
+            SqlDataReader sqlDataReade;
             using (SsqlConnection)
             {
                 SsqlConnection.Open();
 
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
-                sqlDataReader = sqlCommand.ExecuteReader();
+                sqlDataReade = sqlCommand.ExecuteReader();
 
-                while (sqlDataReader.Read())
+                while (sqlDataReade.Read())
                 {
-                    objectRes = MapObjectResult(sqlDataReader);
+                    objectRes = MapObjectResult(sqlDataReade);
                     objectResList.Add(objectRes);
                 }
 
@@ -60,9 +61,10 @@ namespace Framework.Sql2023
             return objectRes;
         }
 
-        public void Insert(T obj)
+        public StatusQuery Insert(T obj)
         {
             string sql = GenerateSqlInsert(obj);
+            StatusQuery result = StatusQuery.RowsNotAfected;
             SsqlConnection = new SqlConnection(ConnectionStr);
             using (SsqlConnection)
             {
@@ -74,14 +76,16 @@ namespace Framework.Sql2023
                     sqlCommand.Parameters.AddWithValue($"@{prop.Name}",prop.GetValue(obj));
                 }
 
-                sqlCommand.ExecuteNonQuery();
+                if (sqlCommand.ExecuteNonQuery() >= 1)
+                    result = StatusQuery.Ok;
             }
 
+            return result;
         }
 
         public StatusQuery Delete<K>(K id)
         {
-            string columnId = string.Empty;
+            //string columnId = string.Empty;
             //string value = string.Empty;
             string sql = GenerateSqlDelete();
             StatusQuery result = StatusQuery.RowsNotAfected;
@@ -94,14 +98,15 @@ namespace Framework.Sql2023
 
                 ////Add Parameters
 
-                PropertyInfo[] props = typeof(T).GetType().GetProperties();
+                //PropertyInfo[] props = Activator.CreateInstance<T>().GetType()
+                //    .GetProperties();
 
-                foreach (PropertyInfo prop in props)
-                {
-                    List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
-                    if (attri.Any(att => att.AttributeType.Name == "Id"))
-                        columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
-                }
+                //foreach (PropertyInfo prop in props)
+                //{
+                //    List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
+                //    if (attri.Any(att => att.AttributeType.Name == "Id"))
+                //        columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
+                //}
 
                 //foreach (PropertyInfo prop in props)
                 //{
@@ -175,7 +180,6 @@ namespace Framework.Sql2023
             return sql;
         }
 
-
         private string GenerateSqlSelect(T objectRes)
         {
             string[] selectElemens = { "Select", "FROM" };
@@ -236,12 +240,18 @@ namespace Framework.Sql2023
 
             PropertyInfo[] properties = objectRes.GetType().GetProperties();
 
+            TableProps tableProps = GetPropsTable(objectRes);
+
             foreach (var property in properties)
             {
-                objectRes.GetType().GetProperty(property.Name).SetValue(
-                    objectRes,
-                    res.GetValue(res.GetOrdinal(property.Name)).ToString().Trim(),
-                    null);
+                if(tableProps.Columns.Any(perty => perty.Name == property.Name))
+                {
+                    objectRes.GetType().GetProperty(property.Name).SetValue(
+                  objectRes,
+                  res.GetValue(res.GetOrdinal(property.Name)).ToString().Trim(),
+                  null);
+                }
+              
             }
 
             return objectRes;
