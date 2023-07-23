@@ -83,6 +83,28 @@ namespace Framework.Sql2023
             return result;
         }
 
+        public StatusQuery Update(T obj)
+        {
+            string sql = GenerateSqlUpdate();
+            StatusQuery result = StatusQuery.RowsNotAfected;
+            SsqlConnection = new SqlConnection(ConnectionStr);
+            using (SsqlConnection)
+            {
+                SsqlConnection.Open();
+                sqlCommand = new SqlCommand(sql, SsqlConnection);
+
+                foreach (PropertyInfo prop in obj.GetType().GetProperties())
+                {
+                    sqlCommand.Parameters.AddWithValue($"@{prop.Name}", prop.GetValue(obj));
+                }
+
+                if (sqlCommand.ExecuteNonQuery() >= 1)
+                    result = StatusQuery.Ok;
+            }
+
+            return result;
+        }
+
         public StatusQuery Delete<K>(K id)
         {
             //string columnId = string.Empty;
@@ -158,6 +180,34 @@ namespace Framework.Sql2023
             values += ")";
 
             sql = sql + " " + columns + " " + selectElemens[1] + values;
+            return sql;
+        }
+
+        public  string GenerateSqlUpdate()
+        {
+            T instace = Activator.CreateInstance<T>();
+            string sql =  $"UPDATE {instace.GetType().Name} SET " ;
+            string columns = string.Empty;
+            TableProps tableProps = GetPropsTable(instace);
+            string columnId = string.Empty;         
+            PropertyInfo[] props = instace.GetType().GetProperties();
+
+            foreach (TableColumns column in tableProps.Columns)
+            {
+                columns += column.Name + "= @" + column.Name + ",";
+               
+            }
+
+            foreach (PropertyInfo prop in props)
+            {
+                List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
+                if (attri.Any(att => att.AttributeType.Name == "Id"))
+                    columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
+            }
+
+            columns = columns.Trim(',').Trim();
+
+            sql = sql + " " + columns + $" WHERE {columnId} = @id";
             return sql;
         }
 
