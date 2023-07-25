@@ -47,6 +47,9 @@
     <Compile Include="TableColumns.cs" />
     <Compile Include="TableProps.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Procedures Sql\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)$(OutDir)FrameworkSql.dll" "C:\Users\alfre\OneDrive\Desktop\MyFKW\MyFkw\ConsoleApp1\Dependencies\"</PostBuildEvent>

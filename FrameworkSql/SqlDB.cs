@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
+using FrameworkSql;
 
 namespace Framework.Sql2023
 {
@@ -149,6 +150,11 @@ namespace Framework.Sql2023
             return result;
         }
 
+        public T Query(string sql)
+        {
+            return Activator.CreateInstance<T>();
+        }
+
         #region Private Methods
 
         private string GenerateSqlInsert(T objectRes)
@@ -283,6 +289,35 @@ namespace Framework.Sql2023
             return tableProps;
         }
 
+        private TableProps GetPropsSql(string sql)
+        {
+            TableProps tableProps = new TableProps();
+            SsqlConnection = new SqlConnection(ConnectionStr);
+   
+            string procedureName = @"GetPropsQuery";
+
+            using (SsqlConnection)
+            {
+                SsqlConnection.Open();
+
+                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                sqlCommand.CommandText = procedureName;
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("query", sql);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                tableProps.Columns = new List<TableColumns>();
+
+                if (sqlDataReader.HasRows)
+                {
+                    while (sqlDataReader.Read())
+                    {
+                        tableProps.Columns.Add(new TableColumns() { Name = sqlDataReader.GetString(1) });
+                    }
+                }
+            }
+            return tableProps;
+        }
+
         private T MapObjectResult(SqlDataReader res)
         {
 
@@ -307,9 +342,7 @@ namespace Framework.Sql2023
             return objectRes;
         }
 
-        #endregion
-
-        
+        #endregion      
 
     }
 

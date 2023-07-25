@@ -13,6 +13,10 @@ namespace Framework.Sql2023.Test
             SqlDB<People> sqlDB = new SqlDB<People>("server=ALFREDO ; database=fkw ; integrated security = true");
             People people = new People();
             string res = sqlDB.GenerateSqlUpdate();
+
+            string sql = "select 1";
+
+            sqlDB.Query(sql);
         }
     }
 
