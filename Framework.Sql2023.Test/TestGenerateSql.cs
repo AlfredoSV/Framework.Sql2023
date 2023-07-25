@@ -8,22 +8,34 @@ namespace Framework.Sql2023.Test
     public class TestGenerateSql
     {
         [TestMethod]
-        public void Test_GenerateSqlUpdate()
+        [Ignore]
+        public void Test_GetPropsSql()
         {
             SqlDB<People> sqlDB = new SqlDB<People>("server=ALFREDO ; database=fkw ; integrated security = true");
             People people = new People();
-            string res = sqlDB.GenerateSqlUpdate();
+           
+            TableProps sql = sqlDB.GetPropsSql("select * from People");
 
-            string sql = "select 1";
+            Assert.IsTrue(sql.Columns.Count == 2);
+            Assert.IsTrue(sql.Name.Equals("People"));
 
-            sqlDB.Query(sql);
+        }
+
+        [TestMethod]
+        public void Test_ExecuteSql()
+        {
+            SqlDB<People> sqlDB = new SqlDB<People>("server=ALFREDO ; database=fkw ; integrated security = true");
+            People people = new People();
+
+            People sql = sqlDB.Query("select * from People");
+
         }
     }
 
     class People
     {
         [Id]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
     }

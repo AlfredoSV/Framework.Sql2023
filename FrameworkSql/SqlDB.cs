@@ -152,7 +152,19 @@ namespace Framework.Sql2023
 
         public T Query(string sql)
         {
-            return Activator.CreateInstance<T>();
+            T objectRes = Activator.CreateInstance<T>();
+            SsqlConnection = new SqlConnection(ConnectionStr);
+            using (SsqlConnection)
+            {
+                SsqlConnection.Open();
+
+                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                sqlDataReader.Read();
+                objectRes = MapObjectResultGeneric(sql,sqlDataReader);
+            }
+
+            return objectRes;
         }
 
         #region Private Methods
@@ -289,7 +301,7 @@ namespace Framework.Sql2023
             return tableProps;
         }
 
-        private TableProps GetPropsSql(string sql)
+        public TableProps GetPropsSql(string sql)
         {
             TableProps tableProps = new TableProps();
             SsqlConnection = new SqlConnection(ConnectionStr);
@@ -341,6 +353,31 @@ namespace Framework.Sql2023
 
             return objectRes;
         }
+
+        private T MapObjectResultGeneric(string query, SqlDataReader res)
+        {
+
+            T objectRes = Activator.CreateInstance<T>();
+
+            PropertyInfo[] properties = objectRes.GetType().GetProperties();
+
+            TableProps tableProps = GetPropsSql(query);
+
+            foreach (var property in properties)
+            {
+                if (tableProps.Columns.Any(perty => perty.Name == property.Name))
+                {
+                    objectRes.GetType().GetProperty(property.Name).SetValue(
+                  objectRes,
+                  res.GetValue(res.GetOrdinal(property.Name)).ToString().Trim(),
+                  null);
+                }
+
+            }
+
+            return objectRes;
+        }
+
 
         #endregion      
 
