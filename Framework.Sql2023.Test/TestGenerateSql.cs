@@ -27,7 +27,7 @@ namespace Framework.Sql2023.Test
             SqlDB<People> sqlDB = new SqlDB<People>("server=ALFREDO ; database=fkw ; integrated security = true");
             People people = new People();
 
-            People sql = sqlDB.Query("select * from People");
+            People sql = sqlDB.Query("select 1 as age");
 
         }
     }

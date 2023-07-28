@@ -150,7 +150,7 @@ namespace Framework.Sql2023
             return result;
         }
 
-        public T Query(string sql)
+        public T Query(string sql, QueryParameters queryParameters )
         {
             T objectRes = Activator.CreateInstance<T>();
             SsqlConnection = new SqlConnection(ConnectionStr);
@@ -159,6 +159,11 @@ namespace Framework.Sql2023
                 SsqlConnection.Open();
 
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
+
+                foreach (Parameter param in queryParameters.Parameters)
+                {
+                    sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
+                }
                 sqlDataReader = sqlCommand.ExecuteReader();
                 sqlDataReader.Read();
                 objectRes = MapObjectResultGeneric(sql,sqlDataReader);
