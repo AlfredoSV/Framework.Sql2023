@@ -108,8 +108,6 @@ namespace Framework.Sql2023
 
         public StatusQuery Delete<K>(K id)
         {
-            //string columnId = string.Empty;
-            //string value = string.Empty;
             string sql = GenerateSqlDelete();
             StatusQuery result = StatusQuery.RowsNotAfected;
             SsqlConnection = new SqlConnection(ConnectionStr);
@@ -119,28 +117,6 @@ namespace Framework.Sql2023
                 SsqlConnection.Open();
                 sqlCommand = new SqlCommand(sql, SsqlConnection);
 
-                ////Add Parameters
-
-                //PropertyInfo[] props = Activator.CreateInstance<T>().GetType()
-                //    .GetProperties();
-
-                //foreach (PropertyInfo prop in props)
-                //{
-                //    List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
-                //    if (attri.Any(att => att.AttributeType.Name == "Id"))
-                //        columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
-                //}
-
-                //foreach (PropertyInfo prop in props)
-                //{
-                //    string nameProp = prop.Name;
-                //    if (nameProp == columnId)
-                //         value = prop.GetValue(type).ToString();                 
-                        
-                //}
-
-                ///
-
                 sqlCommand.Parameters.AddWithValue("id", id);
                 if (sqlCommand.ExecuteNonQuery() >= 1)
                     result = StatusQuery.Ok;
@@ -148,28 +124,6 @@ namespace Framework.Sql2023
             }
 
             return result;
-        }
-
-        public T Query(string sql, QueryParameters queryParameters )
-        {
-            T objectRes = Activator.CreateInstance<T>();
-            SsqlConnection = new SqlConnection(ConnectionStr);
-            using (SsqlConnection)
-            {
-                SsqlConnection.Open();
-
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
-
-                foreach (Parameter param in queryParameters.Parameters)
-                {
-                    sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
-                }
-                sqlDataReader = sqlCommand.ExecuteReader();
-                sqlDataReader.Read();
-                objectRes = MapObjectResultGeneric(sql,sqlDataReader);
-            }
-
-            return objectRes;
         }
 
         #region Private Methods
@@ -206,7 +160,7 @@ namespace Framework.Sql2023
             return sql;
         }
 
-        public  string GenerateSqlUpdate()
+        private  string GenerateSqlUpdate()
         {
             T instace = Activator.CreateInstance<T>();
             string sql =  $"UPDATE {instace.GetType().Name} SET " ;
@@ -306,35 +260,6 @@ namespace Framework.Sql2023
             return tableProps;
         }
 
-        public TableProps GetPropsSql(string sql)
-        {
-            TableProps tableProps = new TableProps();
-            SsqlConnection = new SqlConnection(ConnectionStr);
-   
-            string procedureName = @"GetPropsQuery";
-
-            using (SsqlConnection)
-            {
-                SsqlConnection.Open();
-
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
-                sqlCommand.CommandText = procedureName;
-                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("query", sql);
-                sqlDataReader = sqlCommand.ExecuteReader();
-                tableProps.Columns = new List<TableColumns>();
-
-                if (sqlDataReader.HasRows)
-                {
-                    while (sqlDataReader.Read())
-                    {
-                        tableProps.Columns.Add(new TableColumns() { Name = sqlDataReader.GetString(1) });
-                    }
-                }
-            }
-            return tableProps;
-        }
-
         private T MapObjectResult(SqlDataReader res)
         {
 
@@ -358,31 +283,6 @@ namespace Framework.Sql2023
 
             return objectRes;
         }
-
-        private T MapObjectResultGeneric(string query, SqlDataReader res)
-        {
-
-            T objectRes = Activator.CreateInstance<T>();
-
-            PropertyInfo[] properties = objectRes.GetType().GetProperties();
-
-            TableProps tableProps = GetPropsSql(query);
-
-            foreach (var property in properties)
-            {
-                if (tableProps.Columns.Any(perty => perty.Name == property.Name))
-                {
-                    objectRes.GetType().GetProperty(property.Name).SetValue(
-                  objectRes,
-                  res.GetValue(res.GetOrdinal(property.Name)).ToString().Trim(),
-                  null);
-                }
-
-            }
-
-            return objectRes;
-        }
-
 
         #endregion      
 
