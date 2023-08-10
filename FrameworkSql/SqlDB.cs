@@ -9,9 +9,6 @@ namespace Framework.Sql2023
 {
     public class SqlDB<T>
     {
-        private SqlConnection SsqlConnection;
-        private SqlCommand sqlCommand;
-        private SqlDataReader sqlDataReader;
         private string ConnectionStr { get; set; }
 
         public SqlDB(string connectionStr)
@@ -24,13 +21,13 @@ namespace Framework.Sql2023
             List<T> objectResList = Activator.CreateInstance<List<T>>();
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
-            SsqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
             SqlDataReader sqlDataReade;
-            using (SsqlConnection)
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
+                sqlConnection.Open();
 
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
                 sqlDataReade = sqlCommand.ExecuteReader();
 
                 while (sqlDataReade.Read())
@@ -48,13 +45,13 @@ namespace Framework.Sql2023
         {
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
-            SsqlConnection = new SqlConnection(ConnectionStr);
-            using (SsqlConnection)
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
+                sqlConnection.Open();
 
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
-                sqlDataReader = sqlCommand.ExecuteReader();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
                 sqlDataReader.Read();
                 objectRes = MapObjectResult(sqlDataReader);
             }
@@ -66,11 +63,11 @@ namespace Framework.Sql2023
         {
             string sql = GenerateSqlInsert(obj);
             StatusQuery result = StatusQuery.RowsNotAfected;
-            SsqlConnection = new SqlConnection(ConnectionStr);
-            using (SsqlConnection)
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                sqlConnection.Open();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
 
                 foreach (PropertyInfo prop in obj.GetType().GetProperties())
                 {
@@ -88,11 +85,11 @@ namespace Framework.Sql2023
         {
             string sql = GenerateSqlUpdate();
             StatusQuery result = StatusQuery.RowsNotAfected;
-            SsqlConnection = new SqlConnection(ConnectionStr);
-            using (SsqlConnection)
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                sqlConnection.Open();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
 
                 foreach (PropertyInfo prop in obj.GetType().GetProperties())
                 {
@@ -110,12 +107,12 @@ namespace Framework.Sql2023
         {
             string sql = GenerateSqlDelete();
             StatusQuery result = StatusQuery.RowsNotAfected;
-            SsqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
 
-            using (SsqlConnection)
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                sqlConnection.Open();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
 
                 sqlCommand.Parameters.AddWithValue("id", id);
                 if (sqlCommand.ExecuteNonQuery() >= 1)
@@ -233,19 +230,19 @@ namespace Framework.Sql2023
         private TableProps GetPropsTable(T obj)
         {
             TableProps tableProps = new TableProps();
-            SsqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
             tableProps.Name = obj.GetType().Name;
 
             string sql = @"SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = @TableName";
 
-            using (SsqlConnection)
+            using (sqlConnection)
             {
-                SsqlConnection.Open();
+                sqlConnection.Open();
 
-                sqlCommand = new SqlCommand(sql, SsqlConnection);
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
                 sqlCommand.Parameters.AddWithValue("@TableName", tableProps.Name);
-                sqlDataReader = sqlCommand.ExecuteReader();
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
                 tableProps.Columns = new List<TableColumns>();
 
                 if (sqlDataReader.HasRows)

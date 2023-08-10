@@ -9,14 +9,13 @@ namespace Framework.Sql2023
 {
     public sealed class SqlDBQuery<T>
     {
-        private readonly string _query;
+        
         private readonly string _connectionString;
         private SqlCommand sqlCommand;
         private SqlDataReader sqlDataReader;
 
-        public SqlDBQuery(string query,string connectionString)
-        {
-            _query = query;
+        public SqlDBQuery(string connectionString)
+        {   
             _connectionString = connectionString;
         }
 
@@ -42,6 +41,30 @@ namespace Framework.Sql2023
 
             return objectRes;
         }
+
+        public IEnumerable<T> GetQueryPagination(string sql, QueryParameters queryParameters)
+        {
+            List<T> objectRes = Activator.CreateInstance<List<T>>();
+            SqlConnection connection = new SqlConnection(_connectionString);
+
+            using (connection)
+            {
+                connection.Open();
+
+                sqlCommand = new SqlCommand(sql, connection);
+
+                foreach (Parameter param in queryParameters.Parameters)
+                {
+                    sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
+                }
+                sqlDataReader = sqlCommand.ExecuteReader();
+                sqlDataReader.Read();
+                objectRes = null;// MapObjectResultGeneric(sql, sqlDataReader);
+            }
+
+            return objectRes;
+        }
+
 
         private T MapObjectResultGeneric(string query, SqlDataReader res)
         {
