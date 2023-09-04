@@ -14,9 +14,9 @@ namespace Framework.Sql2023
         private SqlCommand sqlCommand;
         private SqlDataReader sqlDataReader;
 
-        public SqlDBQuery(string connectionString)
+        public SqlDBQuery()
         {   
-            _connectionString = connectionString;
+            _connectionString = SqlStrFramework.Instance.StrConnectionFrameworkSql;
         }
 
         public T Query(string sql, QueryParameters queryParameters)

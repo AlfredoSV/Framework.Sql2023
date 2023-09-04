@@ -11,9 +11,9 @@ namespace Framework.Sql2023
     {
         private string ConnectionStr { get; set; }
 
-        public SqlDB(string connectionStr)
+        public SqlDB()
         {
-            this.ConnectionStr = connectionStr;
+            this.ConnectionStr = SqlStrFramework.Instance.StrConnectionFrameworkSql;
         }
 
         public IEnumerable<T> SelectList()
@@ -117,7 +117,6 @@ namespace Framework.Sql2023
                 sqlCommand.Parameters.AddWithValue("id", id);
                 if (sqlCommand.ExecuteNonQuery() >= 1)
                     result = StatusQuery.Ok;
-
             }
 
             return result;
@@ -138,22 +137,17 @@ namespace Framework.Sql2023
                 columns += column.Name + ",";
                 values += "@"+column.Name + ",";
             }
-                
-
+            
             columns = columns.Trim(',');
-            columns += ")";
-
-            //foreach (PropertyInfo prop in objectRes.GetType().GetProperties())
-            //{
-            //    string type = prop.PropertyType.Name;
-
-            //    values += "'" + prop.GetValue(objectRes) + "'"  + ",";
-            //}
+            columns = string.Concat(columns,")");
+            //columns += ")";
 
             values = values.Trim(',');
-            values += ")";
+            values = string.Concat(values,")");
+            //values += ")";
 
-            sql = sql + " " + columns + " " + selectElemens[1] + values;
+            //sql = sql + " " + columns + " " + selectElemens[1] + values;
+            sql = string.Concat(sql," ",columns," ",selectElemens[1],values);
             return sql;
         }
 
@@ -168,8 +162,7 @@ namespace Framework.Sql2023
 
             foreach (TableColumns column in tableProps.Columns)
             {
-                columns += column.Name + "= @" + column.Name + ",";
-               
+                columns += column.Name + "= @" + column.Name + ",";         
             }
 
             foreach (PropertyInfo prop in props)
@@ -181,7 +174,8 @@ namespace Framework.Sql2023
 
             columns = columns.Trim(',').Trim();
 
-            sql = sql + " " + columns + $" WHERE {columnId} = @id";
+            //sql = sql + " " + columns + $" WHERE {columnId} = @id";
+            sql = string.Concat(sql," ",columns,$" WHERE {columnId} = @id");
             return sql;
         }
 
@@ -200,7 +194,6 @@ namespace Framework.Sql2023
 
             string sql = $"DELETE FROM {instace.GetType().Name} WHERE {columnId} = @id;";
 
-
             return sql;
         }
 
@@ -217,7 +210,6 @@ namespace Framework.Sql2023
                     columns += column.Name + ",";
 
                 columns = columns.Trim(',');
-
             }
             else
                 columns = "*";
@@ -247,7 +239,6 @@ namespace Framework.Sql2023
 
                 if (sqlDataReader.HasRows)
                 {
-
                     while (sqlDataReader.Read())
                     {
                         tableProps.Columns.Add(new TableColumns() { Name = sqlDataReader.GetString(1) });
@@ -259,11 +250,8 @@ namespace Framework.Sql2023
 
         private T MapObjectResult(SqlDataReader res)
         {
-
             T objectRes = Activator.CreateInstance<T>();
-
             PropertyInfo[] properties = objectRes.GetType().GetProperties();
-
             TableProps tableProps = GetPropsTable(objectRes);
 
             foreach (var property in properties)
