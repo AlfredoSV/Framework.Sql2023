@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 
-namespace Framework.Sql2023
+namespace Framework.SqlServer
 {
     public sealed class SqlDBQuery<T>
     {

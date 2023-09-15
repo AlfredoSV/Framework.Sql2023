@@ -56,9 +56,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FrameworkSql\Framework.Sql2023.csproj">
+    <ProjectReference Include="..\FrameworkSql\Framework.SqlServer.2023.csproj">
       <Project>{2f7d7578-f98b-489b-a8fa-47f1e2270dda}</Project>
-      <Name>Framework.Sql2023</Name>
+      <Name>Framework.SqlServer.2023</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

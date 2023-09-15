@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Linq;
 using FrameworkSql;
 
-namespace Framework.Sql2023
+namespace Framework.SqlServer
 {
     public class SqlDB<T>
     {

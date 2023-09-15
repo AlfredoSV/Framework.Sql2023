@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.33529.622
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.Sql2023", "FrameworkSql\Framework.Sql2023.csproj", "{2F7D7578-F98B-489B-A8FA-47F1E2270DDA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.SqlServer.2023", "FrameworkSql\Framework.SqlServer.2023.csproj", "{2F7D7578-F98B-489B-A8FA-47F1E2270DDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.Sql2023.Test", "Framework.Sql2023.Test\Framework.Sql2023.Test.csproj", "{ABA8C429-D452-4FCD-97BD-8DEE9D6C8711}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.SqlServer.2023.Test", "Framework.Sql2023.Test\Framework.SqlServer.2023.Test.csproj", "{ABA8C429-D452-4FCD-97BD-8DEE9D6C8711}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

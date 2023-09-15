@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Framework.Sql2023
+namespace Framework.SqlServer
 {
 
     public class TableProps

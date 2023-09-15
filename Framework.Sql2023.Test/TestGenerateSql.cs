@@ -1,8 +1,7 @@
 ﻿using FrameworkSql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
-namespace Framework.Sql2023.Test
+namespace Framework.SqlServer.Test
 {
     [TestClass]
     public class TestGenerateSql
@@ -11,7 +10,7 @@ namespace Framework.Sql2023.Test
         [Ignore]
         public void Test_GetPropsSql()
         {
-            SqlDB<People> sqlDB = new SqlDB<People>("server=ALFREDO ; database=fkw ; integrated security = true");
+            SqlDB<People> sqlDB = new SqlDB<People>();
             People people = new People();
            
             //TableProps sql = sqlDB.GetPropsSql("select * from People");
