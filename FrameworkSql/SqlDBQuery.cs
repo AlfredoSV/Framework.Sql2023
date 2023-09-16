@@ -11,8 +11,6 @@ namespace Framework.SqlServer
     {
         
         private readonly string _connectionString;
-        private SqlCommand sqlCommand;
-        private SqlDataReader sqlDataReader;
 
         public SqlDBQuery()
         {   
@@ -25,10 +23,10 @@ namespace Framework.SqlServer
             SqlConnection connection = new SqlConnection(_connectionString);
             List<T> objectResList = Activator.CreateInstance<List<T>>();
             SqlDataReader sqlDataReaderQuery;
+            SqlCommand sqlCommand;
             using (connection)
             {
                 connection.Open();
-
                 sqlCommand = new SqlCommand(sql, connection);
 
                 if(queryParameters != null)
@@ -39,11 +37,14 @@ namespace Framework.SqlServer
                     }
                 }
 
+                TableProps tableProps = GetPropsSql(sql, queryParameters);
+
                 sqlDataReaderQuery = sqlCommand.ExecuteReader();
 
+         
                 while (sqlDataReaderQuery.Read())
                 {
-                    objectRes = MapObjectResultGeneric(sql, queryParameters, sqlDataReaderQuery);
+                    objectRes = MapObjectResultGeneric(sql, queryParameters, sqlDataReaderQuery,tableProps);
                     objectResList.Add(objectRes);
                 }
                
@@ -53,38 +54,37 @@ namespace Framework.SqlServer
             return objectResList;
         }
 
-        public IEnumerable<T> GetQueryPagination(string sql, QueryParameters queryParameters)
-        {
-            List<T> objectRes = Activator.CreateInstance<List<T>>();
-            SqlConnection connection = new SqlConnection(_connectionString);
+        //public IEnumerable<T> GetQueryPagination(string sql, QueryParameters queryParameters)
+        //{
+        //    List<T> objectRes = Activator.CreateInstance<List<T>>();
+        //    SqlConnection connection = new SqlConnection(_connectionString);
 
-            using (connection)
-            {
-                connection.Open();
+        //    using (connection)
+        //    {
+        //        connection.Open();
 
-                sqlCommand = new SqlCommand(sql, connection);
+        //        sqlCommand = new SqlCommand(sql, connection);
 
-                foreach (Parameter param in queryParameters.Parameters)
-                {
-                    sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
-                }
-                sqlDataReader = sqlCommand.ExecuteReader();
-                sqlDataReader.Read();
-                objectRes = null;// MapObjectResultGeneric(sql, sqlDataReader);
-            }
+        //        foreach (Parameter param in queryParameters.Parameters)
+        //        {
+        //            sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
+        //        }
+        //        sqlDataReader = sqlCommand.ExecuteReader();
+        //        sqlDataReader.Read();
+        //        objectRes = null;// MapObjectResultGeneric(sql, sqlDataReader);
+        //    }
 
-            return objectRes;
-        }
+        //    return objectRes;
+        //}
 
-        private T MapObjectResultGeneric(string query, QueryParameters queryParameters ,SqlDataReader sqlDataReaderQuery)
+        private T MapObjectResultGeneric(string query, QueryParameters queryParameters ,SqlDataReader sqlDataReaderQuery, TableProps tableProps)
         {
 
             T objectRes = Activator.CreateInstance<T>();
 
             PropertyInfo[] properties = objectRes.GetType().GetProperties();
 
-            TableProps tableProps = GetPropsSql(query,queryParameters);
-
+           
             foreach (var property in properties)
             {
                 if (tableProps.Columns.Any(perty => perty.Name == property.Name))
@@ -102,9 +102,11 @@ namespace Framework.SqlServer
 
         private TableProps GetPropsSql(string sql, QueryParameters queryParameters)
         {
+             SqlDataReader sqlDataReaderGetProps;
             TableProps tableProps = new TableProps();
             tableProps.Columns = new List<TableColumns>();
             SqlConnection connection = new SqlConnection(_connectionString);
+            SqlCommand sqlCommand;
 
             string procedureName = "DropPropsTablett";
 
@@ -137,14 +139,14 @@ namespace Framework.SqlServer
              
                 sqlCommand.ExecuteNonQuery();
                 sqlCommand.CommandText = sqlInformationColums;
-                sqlDataReader = sqlCommand.ExecuteReader();
+                sqlDataReaderGetProps = sqlCommand.ExecuteReader();
 
-                if (sqlDataReader.HasRows)
+                if (sqlDataReaderGetProps.HasRows)
                 {
-                    while (sqlDataReader.Read())
+                    while (sqlDataReaderGetProps.Read())
                     {
                         tableProps.Columns.Add(new TableColumns() 
-                        { Name = sqlDataReader.GetString(1) });
+                        { Name = sqlDataReaderGetProps.GetString(1) });
                     }
                 }
             }

@@ -24,9 +24,9 @@ namespace Framework.Sql2023.Test
 
             QueryParameters queryParameters = new QueryParameters();
 
-            queryParameters.AddParameter("@id","34");
+            queryParameters.AddParameter("@name","Jorge");
 
-            peoplesFilter = query.Query("Select Id,Name from People where id = @id", queryParameters);
+            peoplesFilter = query.Query("Select Id,Name from People where Name = @name", queryParameters);
 
             foreach(var ite in peoplesFilter)
             {
