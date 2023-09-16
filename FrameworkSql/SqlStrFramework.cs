@@ -22,7 +22,7 @@ namespace FrameworkSql
             private set { }
         }
 
-        public string StrConnectionFrameworkSql { get; set; }
+        public string StrConnectionFrameworkSqlServer { get; set; }
 
     }
 }

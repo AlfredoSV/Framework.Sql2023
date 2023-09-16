@@ -8,7 +8,6 @@ namespace FrameworkSql
             new List<Parameter>();
 
         public List<Parameter> Parameters { get; set; }
-
  
         public void AddParameter(string parameter, string value)
         {

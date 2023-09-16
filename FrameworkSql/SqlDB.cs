@@ -13,7 +13,7 @@ namespace Framework.SqlServer
 
         public SqlDB()
         {
-            this.ConnectionStr = SqlStrFramework.Instance.StrConnectionFrameworkSql;
+            this.ConnectionStr = SqlStrFramework.Instance.StrConnectionFrameworkSqlServer;
         }
 
         public IEnumerable<T> SelectList()

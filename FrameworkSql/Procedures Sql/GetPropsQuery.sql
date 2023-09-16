@@ -1,4 +1,4 @@
-CREATE or ALTER PROCEDURE GetPropsQuery (@query varchar(max))
+CREATE or ALTER PROCEDURE DropPropsTablett (@query varchar(max))
 as
 BEGIN
 
@@ -8,13 +8,12 @@ if exists(Select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tt')
 	drop table tt;
 
 
-set @pasaDato = 'Select top 0 tmp.* into tt From (' + @query + ') tmp'	 
+--set @pasaDato = 'Select top 0 tmp.* into tt From (' + @query + ') tmp'	 
 
-EXEC(@pasaDato)
+--EXEC(@pasaDato)
 
 
-SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = 'TT'
+--SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+                --WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = 'TT'
 END;
 
-EXEC GetPropsQuery 'SELECT 1 AS NUMBER'
