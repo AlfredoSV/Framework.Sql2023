@@ -81,7 +81,7 @@ namespace Framework.SqlServer
 
             T objectRes = Activator.CreateInstance<T>();
 
-            PropertyInfo[] properties = typeof(T).GetType().GetProperties();
+            PropertyInfo[] properties = objectRes.GetType().GetProperties();
 
             TableProps tableProps = GetPropsSql(query,queryParameters);
 

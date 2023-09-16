@@ -7,7 +7,7 @@ namespace FrameworkSql
         private List<Parameter> _Parameters =
             new List<Parameter>();
 
-        public List<Parameter> Parameters { get; set; }
+        public List<Parameter> Parameters { get { return _Parameters; } private set { } }
  
         public void AddParameter(string parameter, string value)
         {

@@ -1,4 +1,4 @@
-CREATE or ALTER PROCEDURE DropPropsTablett (@query varchar(max))
+CREATE or ALTER PROCEDURE DropPropsTablett (@query varchar(max)
 as
 BEGIN
 

@@ -20,6 +20,19 @@ namespace Framework.Sql2023.Test
 
             peoples = query.Query("Select Name from People", null);
 
+            List<People> peoplesFilter = new List<People>();
+
+            QueryParameters queryParameters = new QueryParameters();
+
+            queryParameters.AddParameter("@id","34");
+
+            peoplesFilter = query.Query("Select Id,Name from People where id = @id", queryParameters);
+
+            foreach(var ite in peoplesFilter)
+            {
+                Console.WriteLine(ite.Id + " " + " " + ite.Name);
+            }
+
 
         }
 
