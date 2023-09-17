@@ -21,6 +21,9 @@ namespace Framework.SqlServer
 
         public void Query(string query)
         {
+            if (string.IsNullOrEmpty(query))
+                throw new ArgumentNullException();
+
             _query = query;
         }
 
@@ -31,6 +34,7 @@ namespace Framework.SqlServer
             List<T> objectResList = Activator.CreateInstance<List<T>>();
             SqlDataReader sqlDataReaderQuery;
             SqlCommand sqlCommand;
+
             using (connection)
             {
                 connection.Open();
