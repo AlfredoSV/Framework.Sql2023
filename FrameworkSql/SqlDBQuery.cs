@@ -11,13 +11,20 @@ namespace Framework.SqlServer
     {
         
         private readonly string _connectionString;
+        private QueryParameters _queryParameters;
+        private string _query;
 
         public SqlDBQuery()
         {   
             _connectionString = SqlStrFramework.Instance.StrConnectionFrameworkSqlServer;
         }
 
-        public List<T> Query(string sql, QueryParameters queryParameters)
+        public void Query(string query)
+        {
+            _query = query;
+        }
+
+        public List<T> Execute()
         {
             T objectRes = Activator.CreateInstance<T>();
             SqlConnection connection = new SqlConnection(_connectionString);
@@ -27,24 +34,24 @@ namespace Framework.SqlServer
             using (connection)
             {
                 connection.Open();
-                sqlCommand = new SqlCommand(sql, connection);
+                sqlCommand = new SqlCommand(_query, connection);
 
-                if(queryParameters != null)
+                if(_queryParameters != null)
                 {
-                    foreach (Parameter param in queryParameters.Parameters)
+                    foreach (Parameter param in _queryParameters.Parameters)
                     {
                         sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
                     }
                 }
 
-                TableProps tableProps = GetPropsSql(sql, queryParameters);
+                TableProps tableProps = GetPropsSql();
 
                 sqlDataReaderQuery = sqlCommand.ExecuteReader();
 
          
                 while (sqlDataReaderQuery.Read())
                 {
-                    objectRes = MapObjectResultGeneric(sql, queryParameters, sqlDataReaderQuery,tableProps);
+                    objectRes = MapObjectResultGeneric(sqlDataReaderQuery,tableProps);
                     objectResList.Add(objectRes);
                 }
                
@@ -77,7 +84,7 @@ namespace Framework.SqlServer
         //    return objectRes;
         //}
 
-        private T MapObjectResultGeneric(string query, QueryParameters queryParameters ,SqlDataReader sqlDataReaderQuery, TableProps tableProps)
+        private T MapObjectResultGeneric(SqlDataReader sqlDataReaderQuery, TableProps tableProps)
         {
 
             T objectRes = Activator.CreateInstance<T>();
@@ -100,7 +107,7 @@ namespace Framework.SqlServer
             return objectRes;
         }
 
-        private TableProps GetPropsSql(string sql, QueryParameters queryParameters)
+        private TableProps GetPropsSql()
         {
              SqlDataReader sqlDataReaderGetProps;
             TableProps tableProps = new TableProps();
@@ -110,7 +117,7 @@ namespace Framework.SqlServer
 
             string procedureName = "DropPropsTablett";
 
-            string createTable = "Select top 0 tmp.* into tt From("+ sql + ") tmp";
+            string createTable = "Select top 0 tmp.* into tt From("+ _query + ") tmp";
 
             string sqlInformationColums = @"SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
                   WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = 'tt'";
@@ -119,18 +126,19 @@ namespace Framework.SqlServer
             {
                 connection.Open();
 
-                sqlCommand = new SqlCommand(sql, connection);
+                sqlCommand = new SqlCommand();
+                sqlCommand.Connection = connection;
                 sqlCommand.CommandText = procedureName;
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("query", sql);
+                sqlCommand.Parameters.AddWithValue("query", _query);
                 sqlCommand.ExecuteNonQuery();
 
                 sqlCommand.CommandText = createTable;
                 sqlCommand.CommandType = System.Data.CommandType.Text;
 
-                if(queryParameters != null)
+                if(_queryParameters != null)
                 {
-                    foreach (Parameter param in queryParameters.Parameters)
+                    foreach (Parameter param in _queryParameters.Parameters)
                     {
                         sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
                     }
@@ -153,5 +161,8 @@ namespace Framework.SqlServer
             return tableProps;
         }
 
+        public void AddParameters(QueryParameters queryParameters) {
+            _queryParameters = queryParameters;
+        }
     }
 }

@@ -18,17 +18,22 @@ namespace Framework.Sql2023.Test
 
             List<People> peoples = new List<People>();
 
-            peoples = query.Query("Select Name from People", null);
+            query.Query("Select 1 as Id, Name from People");
 
-            List<People> peoplesFilter = new List<People>();
+            peoples = query.Execute();
+
+            List <People> peoplesFilter = new List<People>();
 
             QueryParameters queryParameters = new QueryParameters();
 
             queryParameters.AddParameter("@name","Jorge");
 
-            peoplesFilter = query.Query("Select Id,Name from People where Name = @name", queryParameters);
+            
+            query.Query("Select Id,Name from People where Name = @name");
+            query.AddParameters(queryParameters);
+            peoplesFilter = query.Execute();
 
-            foreach(var ite in peoplesFilter)
+            foreach (var ite in peoplesFilter)
             {
                 Console.WriteLine(ite.Id + " " + " " + ite.Name);
             }
