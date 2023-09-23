@@ -134,7 +134,7 @@ namespace Framework.SqlServer
                 sqlCommand.Connection = connection;
                 sqlCommand.CommandText = procedureName;
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("query", _query);
+                
                 sqlCommand.ExecuteNonQuery();
 
                 sqlCommand.CommandText = createTable;
@@ -147,8 +147,7 @@ namespace Framework.SqlServer
                         sqlCommand.Parameters.AddWithValue(param.ParameterQuery, param.Value);
                     }
                 }
-
-             
+                
                 sqlCommand.ExecuteNonQuery();
                 sqlCommand.CommandText = sqlInformationColums;
                 sqlDataReaderGetProps = sqlCommand.ExecuteReader();

@@ -256,7 +256,7 @@ namespace Framework.SqlServer
 
             foreach (var property in properties)
             {
-                if(tableProps.Columns.Any(perty => perty.Name == property.Name))
+                if(tableProps.Columns.Any(perty => perty.Name.ToLower() == property.Name.ToLower()))
                 {
                     objectRes.GetType().GetProperty(property.Name).SetValue(
                   objectRes,
