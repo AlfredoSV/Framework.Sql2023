@@ -18,6 +18,24 @@ namespace Framework.Sql2023.Test
             SqlStrFramework.Instance.StrConnectionFrameworkSqlServer = "Server=Alfredo;Database=fkw;User=sa;Password=1007";
         }
 
+        [TestMethod]
+        public void Insert_Test()
+        {
+            SqlDB<Escritor> sqlDB = new SqlDB<Escritor>();
+
+            Escritor escritor = new Escritor()
+            {
+                Id = "3",
+                Nombre = "Alfredo",
+                Apellidos = "Sanchez Verduzco",
+                Direccion = "NANANA"
+            };
+
+            int response = sqlDB.Insert(escritor);
+
+            Assert.IsTrue((int)StatusQuery.Ok == response);
+
+        }
 
         [TestMethod]
         public void SelectList_Test()
@@ -32,11 +50,12 @@ namespace Framework.Sql2023.Test
 
         }
 
-        [TestMethod]
-        public void Delete_Test()
-        {
+        //Next
+        //[TestMethod]
+        //public void Delete_Test()
+        //{
 
-        }
+        //}
 
     }
 
