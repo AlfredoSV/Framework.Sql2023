@@ -59,10 +59,10 @@ namespace Framework.SqlServer
             return objectRes;
         }
 
-        public StatusQuery Insert(T obj)
+        public int Insert(T obj)
         {
             string sql = GenerateSqlInsert(obj);
-            StatusQuery result = StatusQuery.RowsNotAfected;
+            int result = (int)StatusQuery.RowsNotAfected;
             SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
             using (sqlConnection)
             {
@@ -75,7 +75,7 @@ namespace Framework.SqlServer
                 }
 
                 if (sqlCommand.ExecuteNonQuery() >= 1)
-                    result = StatusQuery.Ok;
+                    result = (int)StatusQuery.Ok;
             }
 
             return result;
@@ -256,7 +256,7 @@ namespace Framework.SqlServer
 
             foreach (var property in properties)
             {
-                if(tableProps.Columns.Any(perty => perty.Name == property.Name))
+                if(tableProps.Columns.Any(perty => perty.Name.ToLower() == property.Name.ToLower()))
                 {
                     objectRes.GetType().GetProperty(property.Name).SetValue(
                   objectRes,

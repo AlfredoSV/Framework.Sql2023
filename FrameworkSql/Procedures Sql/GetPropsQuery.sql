@@ -1,8 +1,8 @@
-CREATE or ALTER PROCEDURE DropPropsTablett (@query varchar(max)
+CREATE or ALTER PROCEDURE DropPropsTablett 
 as
 BEGIN
 
-DECLARE @pasaDato VARCHAR(MAX)
+--DECLARE @pasaDato VARCHAR(MAX)
 
 if exists(Select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tt')
 	drop table tt;

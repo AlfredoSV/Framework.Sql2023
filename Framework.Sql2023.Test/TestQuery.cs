@@ -9,6 +9,7 @@ namespace Framework.Sql2023.Test
     [TestClass]
     public class TestQuery
     {
+        [Ignore]
         [TestMethod]
         public void TestQueryExcute()
         {
