@@ -9,19 +9,27 @@ namespace Framework.SqlServer
 {
     public class SqlDB<T>
     {
-        private string ConnectionStr { get; set; }
+        #region Properties and Contructor
+        private string _connectionStr;
 
         public SqlDB()
         {
-            this.ConnectionStr = SqlStrFramework.Instance.StrConnectionFrameworkSqlServer;
+            _connectionStr = SqlStrFramework.Instance.StrConnectionFrameworkSqlServer;
         }
+        #endregion
 
+        #region Public methods      
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Enumerable<T></returns>
         public IEnumerable<T> SelectList()
         {
             List<T> objectResList = Activator.CreateInstance<List<T>>();
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
             SqlDataReader sqlDataReade;
             using (sqlConnection)
             {
@@ -45,7 +53,7 @@ namespace Framework.SqlServer
         {
             T objectRes = Activator.CreateInstance<T>();
             string sql = GenerateSqlSelect(objectRes);
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
             using (sqlConnection)
             {
                 sqlConnection.Open();
@@ -63,7 +71,7 @@ namespace Framework.SqlServer
         {
             string sql = GenerateSqlInsert(obj);
             int result = (int)StatusQuery.RowsNotAfected;
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
             using (sqlConnection)
             {
                 sqlConnection.Open();
@@ -71,7 +79,7 @@ namespace Framework.SqlServer
 
                 foreach (PropertyInfo prop in obj.GetType().GetProperties())
                 {
-                    sqlCommand.Parameters.AddWithValue($"@{prop.Name}",prop.GetValue(obj));
+                    sqlCommand.Parameters.AddWithValue($"@{prop.Name}", prop.GetValue(obj));
                 }
 
                 if (sqlCommand.ExecuteNonQuery() >= 1)
@@ -85,7 +93,7 @@ namespace Framework.SqlServer
         {
             string sql = GenerateSqlUpdate();
             StatusQuery result = StatusQuery.RowsNotAfected;
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
             using (sqlConnection)
             {
                 sqlConnection.Open();
@@ -107,7 +115,7 @@ namespace Framework.SqlServer
         {
             string sql = GenerateSqlDelete();
             StatusQuery result = StatusQuery.RowsNotAfected;
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
 
             using (sqlConnection)
             {
@@ -122,6 +130,8 @@ namespace Framework.SqlServer
             return result;
         }
 
+        #endregion
+
         #region Private Methods
 
         private string GenerateSqlInsert(T objectRes)
@@ -135,34 +145,34 @@ namespace Framework.SqlServer
             foreach (TableColumns column in tableProps.Columns)
             {
                 columns += column.Name + ",";
-                values += "@"+column.Name + ",";
+                values += "@" + column.Name + ",";
             }
-            
+
             columns = columns.Trim(',');
-            columns = string.Concat(columns,")");
+            columns = string.Concat(columns, ")");
             //columns += ")";
 
             values = values.Trim(',');
-            values = string.Concat(values,")");
+            values = string.Concat(values, ")");
             //values += ")";
 
             //sql = sql + " " + columns + " " + selectElemens[1] + values;
-            sql = string.Concat(sql," ",columns," ",selectElemens[1],values);
+            sql = string.Concat(sql, " ", columns, " ", selectElemens[1], values);
             return sql;
         }
 
-        private  string GenerateSqlUpdate()
+        private string GenerateSqlUpdate()
         {
             T instace = Activator.CreateInstance<T>();
-            string sql =  $"UPDATE {instace.GetType().Name} SET " ;
+            string sql = $"UPDATE {instace.GetType().Name} SET ";
             string columns = string.Empty;
             TableProps tableProps = GetPropsTable(instace);
-            string columnId = string.Empty;         
+            string columnId = string.Empty;
             PropertyInfo[] props = instace.GetType().GetProperties();
 
             foreach (TableColumns column in tableProps.Columns)
             {
-                columns += column.Name + "= @" + column.Name + ",";         
+                columns += column.Name + "= @" + column.Name + ",";
             }
 
             foreach (PropertyInfo prop in props)
@@ -175,7 +185,7 @@ namespace Framework.SqlServer
             columns = columns.Trim(',').Trim();
 
             //sql = sql + " " + columns + $" WHERE {columnId} = @id";
-            sql = string.Concat(sql," ",columns,$" WHERE {columnId} = @id");
+            sql = string.Concat(sql, " ", columns, $" WHERE {columnId} = @id");
             return sql;
         }
 
@@ -187,7 +197,7 @@ namespace Framework.SqlServer
 
             foreach (PropertyInfo prop in props)
             {
-                List<CustomAttributeData>  attri = prop.CustomAttributes.ToList();
+                List<CustomAttributeData> attri = prop.CustomAttributes.ToList();
                 if (attri.Any(att => att.AttributeType.Name == "Id"))
                     columnId = attri.Where(att => att.AttributeType.Name == "Id").FirstOrDefault().AttributeType.Name;
             }
@@ -222,7 +232,7 @@ namespace Framework.SqlServer
         private TableProps GetPropsTable(T obj)
         {
             TableProps tableProps = new TableProps();
-            SqlConnection sqlConnection = new SqlConnection(ConnectionStr);
+            SqlConnection sqlConnection = new SqlConnection(_connectionStr);
             tableProps.Name = obj.GetType().Name;
 
             string sql = @"SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
@@ -256,14 +266,14 @@ namespace Framework.SqlServer
 
             foreach (var property in properties)
             {
-                if(tableProps.Columns.Any(perty => perty.Name.ToLower() == property.Name.ToLower()))
+                if (tableProps.Columns.Any(perty => perty.Name.ToLower() == property.Name.ToLower()))
                 {
                     objectRes.GetType().GetProperty(property.Name).SetValue(
                   objectRes,
                   res.GetValue(res.GetOrdinal(property.Name)).ToString().Trim(),
                   null);
                 }
-              
+
             }
 
             return objectRes;
